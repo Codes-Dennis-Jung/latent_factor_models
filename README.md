@@ -59,6 +59,60 @@ lfm fit rppca --returns synthetic_data/returns.csv -p n_factors=3 -p gamma=10
 lfm run examples/config_example.json --backend process
 ```
 
+## Outputs
+
+Every estimator stores its results as attributes ending in `_` and offers
+methods for new data. `pandas` labels (dates, assets) are kept when DataFrames
+are passed.
+
+**Return-based models** (`PCA`, `RPPCA`, `XSTargetPCA`, `TSTargetPCA`,
+`XSTSTargetPCA`, `SPCA`)
+
+| Output | Shape | Content |
+|---|---|---|
+| `weights_` | N × K | factor-portfolio weights ω̂ (factors are portfolios of the assets) |
+| `factors_` | T × K | in-sample factor returns F = R ω̂ (with means = risk premia) |
+| `loadings_` | N × K | time-series OLS betas |
+| `intercepts_` | N | in-sample pricing errors (alphas) |
+| `eigenvalues_` | K | leading eigenvalues of the model's operator |
+| `transform(R)`, `fitted_values(R)`, `residuals(R)` | | factors / systematic / idiosyncratic parts for any returns |
+| `evaluate(R)` | dict | `sharpe_ratio`, `rms_alpha`, `unexplained_variation`, `total_r2` (in or out of sample) |
+| `projection_loadings()`, `oos_loadings(kind)` | N × K | pricing loadings (Lettau-Pelger / OLS) |
+
+Spectral models add `eigenvectors_`, `operator_`, `operator_trace_`,
+`spectrum()`, `absorption_ratio()`, `variance_signal()` and — for target
+models — `target_metrics()` (XS-metric per factor and for the SDF, TS-metric).
+
+**SPCA** adds `risk_premia(p)` (risk premia, standard errors, t-stats,
+p-values, alphas and their standard errors, weak-factor Wald tests),
+`latent_factors_`, `eta_`, `gamma_`, `gamma_g_`, `alpha_g_`, `selected_`
+(assets per step), `mimicking_weights_`, `sdf_weights_`, `hedging_r2_` and
+`hedging_r2(R, G)` out of sample.
+
+**IPCA**
+
+| Output | Shape | Content |
+|---|---|---|
+| `gamma_beta_`, `gamma_alpha_`, `gamma_delta_` | L × K, L, L × M | characteristics → betas / alpha / observed-factor loadings |
+| `factors_` | T × K | latent factor returns |
+| `loadings(panel)` | T × N × K | time-varying betas |
+| `predict(panel, factors="realized" \| "mean")` | T × N | fitted / predicted returns |
+| `transform(panel)` | T' × K | out-of-sample factors |
+| `evaluate(panel)` | dict | total and predictive R², assets and managed portfolios |
+| `test_alpha()`, `test_instrument(l)`, `test_observed_factors()` | `BootstrapResult` | statistic, p-value, bootstrap draws |
+| `n_iter_`, `converged_` | | ALS diagnostics |
+
+**Inference, selection and engine**
+
+| Object | Output |
+|---|---|
+| `ThreePassRiskPremia(...).fit(R, G)` | `RiskPremiaResult`: `gamma_g`, `se`, `tstat`, `pvalue`, `eta`, `gamma`, `r2_g`, `wald_stat`, `wald_pvalue`, `gamma_0`, `gamma_0_se`, `r2_cs`, `summary()` |
+| `GridSearchCV(...).fit(...)` | `best_params_`, `best_score_`, `best_model_`, `result_.to_records()` (all grid points × folds) |
+| `Engine(...).run(...)` | `EngineResult` with one record per model and sample (`to_frame()` → DataFrame) |
+| `selection.onatski`, `giglio_xiu`, `bai_ng`, `eigenvalue_ratio` | estimated number of factors |
+| `lfm fit … -o DIR` | `summary.json`, `factors.csv`, `weights.csv`, `loadings.csv` |
+| `lfm run config.json` | results table (stdout) and CSV |
+
 ## Design in one paragraph
 
 PCA, RP-PCA and the three target-PCA estimators are the same estimator: the
@@ -81,7 +135,7 @@ parallel `Executor`. See [docs/architecture.md](docs/architecture.md).
 * Target PCA (no public code) is verified against brute-force constructions
   of the paper's operators, the equivalent $T\times T$ formulation and the
   weighted objective.
-* 69 tests, including Monte-Carlo coverage of confidence intervals, `ruff`
+* 86 tests (incl. executing all notebooks), Monte-Carlo coverage of confidence intervals, `ruff`
   (incl. numpy docstrings) and `mypy` clean.
 
 [docs/validation.md](docs/validation.md) records every check, the documented
@@ -90,9 +144,12 @@ research scripts.
 
 ## Documentation
 
-Start at [docs/index.md](docs/index.md): one document per model (technical
-description, methodology, implementation, example), plus inference,
-evaluation/engine and CLI.
+| Document | Content |
+|---|---|
+| [TECHNICAL_DESCRIPTION.md](TECHNICAL_DESCRIPTION.md) | the mathematics: every estimator, identity, test statistic and algorithm |
+| [METHODOLOGY.md](METHODOLOGY.md) | the process: from data to results, choosing a model, tuning, inference, validation |
+| [docs/](docs/index.md) | one document per model (technical description, methodology, example), inference, evaluation/engine, CLI |
+| [docs/validation.md](docs/validation.md) | comparison with the authors' original code and the papers, documented deviations |
 
 ## Example notebooks
 

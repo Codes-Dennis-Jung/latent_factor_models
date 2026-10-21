@@ -22,6 +22,8 @@ All notable changes to this project are documented here. The format follows
   `Executor` (serial / thread / process backends, reproducible seeding).
 - Synthetic data generators, the `lfm` command-line interface, documentation
   and ten executed Jupyter notebooks (`examples/`) covering every model.
+- `TECHNICAL_DESCRIPTION.md` (mathematics) and `METHODOLOGY.md` (process); README
+  section listing all outputs.
 - GitHub Actions CI: lint, type check, tests on Python 3.10-3.14 x
   Linux/Windows/macOS, minimum NumPy/SciPy, wheel smoke test.
 

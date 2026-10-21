@@ -76,6 +76,8 @@ include = [
     "docs",
     "examples",
     "README.md",
+    "TECHNICAL_DESCRIPTION.md",
+    "METHODOLOGY.md",
     "CHANGELOG.md",
     "LICENSE-MIT",
     "LICENSE-APACHE",
