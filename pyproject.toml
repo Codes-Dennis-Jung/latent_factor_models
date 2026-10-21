@@ -1,0 +1,122 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "latent-factor-models"
+dynamic = ["version"]
+description = "A modular, tested framework for latent asset-pricing factor models: PCA, RP-PCA, SPCA, IPCA and target PCA (XS, TS, XS-TS)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Dennis Jung" }]
+keywords = [
+    "asset pricing",
+    "factor models",
+    "PCA",
+    "RP-PCA",
+    "IPCA",
+    "supervised PCA",
+    "target PCA",
+    "econometrics",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
+]
+dependencies = ["numpy>=1.23", "scipy>=1.9"]
+
+[project.optional-dependencies]
+pandas = ["pandas>=1.5"]
+dev = [
+    "pandas>=1.5",
+    "pytest>=7",
+    "pytest-cov>=4",
+    "ruff>=0.5",
+    "mypy>=1.8",
+    "build>=1.0",
+]
+
+[project.scripts]
+lfm = "latent_factor_models.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Codes-Dennis-Jung/latent_factor_models"
+Documentation = "https://github.com/Codes-Dennis-Jung/latent_factor_models/tree/main/docs"
+Issues = "https://github.com/Codes-Dennis-Jung/latent_factor_models/issues"
+
+[tool.hatch.version]
+path = "src/latent_factor_models/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/latent_factor_models"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/latent_factor_models",
+    "tests",
+    "docs",
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "NOTICE",
+    "CITATION.cff",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "src"]
+addopts = "-ra --strict-markers --doctest-modules"
+markers = ["slow: long-running tests (bootstrap, multiprocessing)"]
+filterwarnings = ["error::RuntimeWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "NPY", "RUF", "D"]
+ignore = [
+    "N803",  # argument names such as R, G, Z follow the papers' notation
+    "N806",  # variable names such as T, N, K, M follow the papers' notation
+    "N802",  # properties T, N, L follow the papers' notation
+    "D401",  # descriptive docstrings for properties and accessors
+    "D105",
+    "D107",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"examples/*" = ["D103"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["latent_factor_models"]

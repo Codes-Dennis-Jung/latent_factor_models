@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below, together with the papers of the methods you use (see NOTICE)."
+title: "latent-factor-models: latent asset-pricing factor models in Python"
+authors:
+  - family-names: Jung
+    given-names: Dennis
+version: 0.1.0
+date-released: 2026-10-21
+license: MIT

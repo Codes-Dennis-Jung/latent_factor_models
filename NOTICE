@@ -1,0 +1,30 @@
+latent-factor-models
+Copyright (c) 2026 Dennis Jung
+Licensed under the MIT License (see LICENSE).
+
+This package is an independent implementation of methods published in the
+academic literature. Credit for the methods belongs to their authors:
+
+  * Lettau, M. and Pelger, M. (2020). Estimating latent asset-pricing factors.
+    Journal of Econometrics 218(1), 1-31.  (RP-PCA)
+  * Lettau, M. and Pelger, M. (2020). Factors that fit the time series and
+    cross-section of stock returns. Review of Financial Studies 33(5), 2274-2325.
+  * Kelly, B., Pruitt, S. and Su, Y. (2019). Characteristics are covariances:
+    A unified model of risk and return. Journal of Financial Economics 134(3),
+    501-524.  (IPCA)
+  * Giglio, S. and Xiu, D. (2021). Asset pricing with omitted factors.
+    Journal of Political Economy 129(7), 1947-1990.  (three-pass estimator)
+  * Giglio, S., Xiu, D. and Zhang, D. Test assets and weak factors.
+    Journal of Finance.  (supervised PCA)
+  * Bryzgalova, S., DeMiguel, V., Li, S. and Pelger, M. (2026). Asset-pricing
+    factors with economic targets. Working paper.  (target PCA)
+  * Onatski, A. (2010). Determining the number of factors from empirical
+    distribution of eigenvalues. Review of Economics and Statistics 92(4).
+
+The archived legacy IPCA code in archive/legacy/IPCA is a modified fork of
+https://github.com/bkelly-lab/ipca (MIT License, Copyright (c) the IPCA
+authors). The new implementation in src/ does not reuse that code.
+
+The papers in Literature/ are copyrighted by their publishers/authors and
+are NOT covered by the MIT license of this package; they are excluded from
+all distributions built from this repository.

@@ -1,0 +1,17 @@
+{
+  "data": {
+    "returns": "../synthetic_data/returns.csv",
+    "factors": "../synthetic_data/reference.csv",
+    "xs_target": "../synthetic_data/xs_target.csv"
+  },
+  "models": [
+    {"name": "pca", "params": {"n_factors": 3}},
+    {"name": "rppca", "params": {"n_factors": 3, "gamma": 10}},
+    {"name": "ts_target_pca", "params": {"n_factors": 3, "gamma_ts": 15}},
+    {"name": "xsts_target_pca", "params": {"n_factors": 3, "gamma_xs": 0.01, "gamma_ts": 15},
+     "label": "XS-TS target"}
+  ],
+  "evaluation": {"window": 240, "refit_every": 12, "expanding": false},
+  "execution": {"backend": "process", "n_jobs": -1},
+  "output": "../results_example.csv"
+}
