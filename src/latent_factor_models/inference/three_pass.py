@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MIT OR Apache-2.0
 # Copyright (c) 2026 Dennis Jung
 r"""Risk premia of observable factors with omitted factors (Giglio and Xiu, 2021).
 

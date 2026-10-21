@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MIT OR Apache-2.0
 # Copyright (c) 2026 Dennis Jung
 """Estimators of the number of factors from an eigenvalue spectrum."""
 

@@ -26,6 +26,7 @@ All notable changes to this project are documented here. The format follows
   Linux/Windows/macOS, minimum NumPy/SciPy, wheel smoke test.
 
 ### Changed
+- Dual licensed under MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`).
 - Replaces the original research scripts (TPCA, RPPCA, SPCA, IPCA folders),
   which were removed; `docs/validation.md` lists the errors found and fixed
   (the scripts remain in the git history).

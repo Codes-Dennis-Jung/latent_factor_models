@@ -105,5 +105,14 @@ python -m build           # sdist + wheel
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Method credits and full references of the
-underlying papers are in [NOTICE](NOTICE).
+Licensed under either of
+
+* MIT License ([LICENSE-MIT](LICENSE-MIT)), or
+* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE)),
+
+at your option. Unless you explicitly state otherwise, any contribution
+intentionally submitted for inclusion in this work shall be dual licensed as
+above, without any additional terms or conditions.
+
+Method credits and full references of the underlying papers are in
+[NOTICE](NOTICE).

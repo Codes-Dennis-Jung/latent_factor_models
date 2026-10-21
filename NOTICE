@@ -1,6 +1,12 @@
 latent-factor-models
 Copyright (c) 2026 Dennis Jung
-Licensed under the MIT License (see LICENSE).
+Licensed under either of
+
+  * MIT License (LICENSE-MIT or https://opensource.org/licenses/MIT)
+  * Apache License, Version 2.0 (LICENSE-APACHE or
+    https://www.apache.org/licenses/LICENSE-2.0)
+
+at your option.
 
 This package is an independent implementation of methods published in the
 academic literature. Credit for the methods belongs to their authors:

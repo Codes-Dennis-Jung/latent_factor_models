@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MIT OR Apache-2.0
 # Copyright (c) 2026 Dennis Jung
 """Core abstractions: data containers, base classes, registry and linear algebra."""
 

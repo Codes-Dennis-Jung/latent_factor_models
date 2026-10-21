@@ -6,4 +6,6 @@ authors:
     given-names: Dennis
 version: 0.1.0
 date-released: 2026-10-21
-license: MIT
+license:
+  - MIT
+  - Apache-2.0

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.24"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,8 +8,8 @@ dynamic = ["version"]
 description = "A modular, tested framework for latent asset-pricing factor models: PCA, RP-PCA, SPCA, IPCA and target PCA (XS, TS, XS-TS)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
-license-files = ["LICENSE", "NOTICE"]
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]
 authors = [{ name = "Dennis Jung" }]
 keywords = [
     "asset pricing",
@@ -72,7 +72,8 @@ include = [
     "examples",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE",
+    "LICENSE-MIT",
+    "LICENSE-APACHE",
     "NOTICE",
     "CITATION.cff",
 ]
