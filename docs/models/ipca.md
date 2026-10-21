@@ -85,9 +85,11 @@ reproducible given `seed`.
 * Both ALS steps are vectorised over time (`einsum`, batched `solve`). The
   legacy code looped over periods and depended on numba, joblib, sklearn and
   progressbar, none of which are needed now.
-* Verified against the reference ALS (`bkelly-lab/ipca`, MIT): identical
-  $\Gamma$, factors and $R^2$ on an unbalanced panel, with and without
-  intercept.
+* Verified against the original `ipca` package 0.6.7 (bkelly-lab, MIT):
+  identical $\Gamma_\beta$, $\Gamma_\alpha$, $\Gamma_\delta$, factors and fitted
+  values for the restricted model, with intercept and with an observed
+  factor. The original's `score()` reports a centred $R^2$; the package
+  reports the paper's uncentred $R^2$.
 * Fixed relative to the legacy fork: intercept + observed factors crashed,
   `predictOOS` re-estimated the intercept as a free factor, the block bootstrap
   skipped the last block, retry loops could run forever, `BS_Wbeta` tested a

@@ -72,10 +72,12 @@ parallel `Executor`. See [docs/architecture.md](docs/architecture.md).
 
 ## Validation
 
-* Giglio-Xiu three-pass and SPCA reproduce the authors' MATLAB code
-  (`PCAFM.m`, `SPCA_cv.m`) exactly.
-* IPCA reproduces the reference ALS of `bkelly-lab/ipca`.
-* RP-PCA matches the independent `rppca` package.
+* Compared with the **original** code: Giglio-Xiu `PCAFM.m`, SPCA
+  `SPCA_cv.m`, RP-PCA `rpPCA_cv.m` (Giglio-Xiu-Zhang) and the original
+  `ipca` package (bkelly-lab), with identical results. The few places where
+  the authors' code departs from their paper follow the paper and are
+  documented in [docs/validation.md](docs/validation.md).
+* RP-PCA also matches the independent `rppca` package.
 * Target PCA (no public code) is verified against brute-force constructions
   of the paper's operators, the equivalent $T\times T$ formulation and the
   weighted objective.

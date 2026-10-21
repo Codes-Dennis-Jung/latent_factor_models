@@ -77,9 +77,11 @@ $1-\lVert\bar G_{oos}-W\bar R_{oos}\rVert^2/\lVert\bar G_{oos}\rVert^2$
 * `zero_beta=True` cross-sectionally demeans returns first (Section 2.2.6).
 * `risk_premia(p)` reuses the nested deflation, so inference for any
   $p\le K$ needs no refit.
-* Verified against a port of the authors' MATLAB `SPCA_cv.m`: identical
-  $\hat\gamma_g$, Avar, $\hat\alpha$, Avar($\hat\alpha$), $W$, $b$ and Wald
-  statistics.
+* Verified against a literal translation of the authors' `SPCA_cv.m`:
+  identical $\hat\gamma_g$, Avar, $\hat\alpha$, Avar($\hat\alpha$), $W$, $b$ and
+  selected sets. The authors' code keeps $N_0+1$ assets per step (a 1-based
+  indexing artefact); the package keeps exactly $N_0$ as in the paper, so
+  `n_select=N0 + 1` (and `lags=1`, their default) reproduces their output.
 * Fixed relative to the legacy code: crash for $d\ge 2$ and on NumPy 2,
   hedging $R^2$ pooled across factors, RMS divided by $N$ instead of $d$,
   out-of-sample Sharpe ratio always $\approx 0$, wrong p-value distribution,

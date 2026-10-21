@@ -65,9 +65,10 @@ implements it exactly that way, and a test checks the equivalence.
 
 * Implemented as `SpectralSpec(ts_target=1_T, gamma_ts=gamma)`. The mean term
   enters as $\gamma(Q_G'R)'(Q_G'R)$ with $Q_G = 1/\sqrt T$.
-* Verified against the independent `rppca` package on PyPI (identical
-  eigenvalues, factor space, Sharpe ratio and RMS α for
-  $\gamma\in\{-1,0,10,20\}$) and against the brute-force operator.
+* Verified against the authors' `rpPCA_cv.m` (Giglio-Xiu-Zhang code;
+  identical factor space, risk premia and SDF weights) and the independent
+  `rppca` package (identical eigenvalues, factor space, Sharpe ratio and
+  RMS α for $\gamma\in\{-1,0,10,20\}$), and against the brute-force operator.
 * Fixed relative to the legacy code: eigenvalues were unsorted (`np.linalg.eig`),
   the Onatski test was called with $r_{\max}=K$, $\sigma_e$ used `np.cov`
   along the wrong axis, and the factor-number estimator returned a flattened

@@ -71,10 +71,14 @@ $\frac1T(K\Pi_{11}K'-K\Pi_{13}-\Pi_{13}'K'+\Pi_{33})$. See `docs/models/spca.md`
 
 ## Validation
 
-* Three-pass: identical to the authors' `PCAFM.m` for $\hat\gamma_g$,
-  $\hat\gamma_0$, all variances (up to the documented $N$ vs $N-1$) and
-  $\hat p$ for $c\in\{0.25,0.5,0.75\}$.
-* SPCA: identical to the authors' `SPCA_cv.m` for all inference outputs.
+* Three-pass: identical to a literal translation of the authors' `PCAFM.m`
+  for $\hat\gamma_g$, $\hat\gamma_0$, the zero-beta variances (up to the
+  documented $N$ vs $N-1$), $R^2_g$, cross-sectional $R^2$, Wald p-values and
+  $\hat p$. Without a zero-beta rate the package evaluates Theorem 1 at the
+  no-intercept $\hat\gamma$, while `PCAFM.m` plugs in the intercept-regression
+  premia; both are asymptotically equivalent (see `docs/validation.md`).
+* SPCA: identical to the authors' `SPCA_cv.m` for all inference outputs
+  (with `n_select=N0 + 1`, see `docs/models/spca.md`).
 * Monte Carlo: 95% intervals cover the true premium in about 95% of samples
   (`tests/test_math_metrics_inference.py`).
 

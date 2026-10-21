@@ -7,46 +7,73 @@ errors found in the previous research scripts that this package replaces.
 The papers themselves are not distributed with the package (copyright); see
 `NOTICE` for full references.
 
-## Numerical validation against reference implementations
+## Numerical validation against the original sources
 
-The new estimators were checked numerically against the authors' own code
-where it exists:
+Every estimator was compared with the **original** code published by the
+authors or, where no code exists, with the equations of the paper. Matches
+are to machine precision (relative tolerance $10^{-8}$) unless noted.
 
-* **Giglio-Xiu three-pass**: matches the authors' MATLAB `PCAFM.m`
-  (from `Codes_RP.zip`, Dacheng Xiu's website) for risk premia, the zero-beta
-  rate, all asymptotic variances (the paper's `sigma_alpha^2` uses `1/n`, the
-  MATLAB code `1/(n-1)`; the package follows the paper) and the estimated
-  number of factors.
-* **SPCA**: matches a port of the authors' MATLAB `SPCA_cv.m` (`WF_Simu.zip`)
-  for risk premia, their variance, alphas and their variance, mimicking
-  portfolios, SDF weights and Wald statistics.
-* **IPCA**: matches the reference ALS (`bkelly-lab/ipca`) for `Gamma`, factors
-  and R² with and without intercept on an unbalanced panel.
-* **RP-PCA**: matches the independent `rppca` package (PyPI) for eigenvalues,
-  factor space, maximum Sharpe ratio and RMS alpha.
-* **Target PCA** (no public code): verified against brute-force constructions
-  of the paper's operators (explicit `T x T` matrices, matrix square roots),
-  the equivalent `T x T` formulation of Proposition 1 and the weighted
-  low-rank objective (11). See `tests/test_math_spectral.py`.
+| Model | Reference | What was compared | Result |
+|---|---|---|---|
+| Three-pass (Giglio-Xiu) | `PCAFM.m` from `Codes_RP.zip` (D. Xiu's website), literal line-by-line translation | $\hat\gamma_0$, $\hat\gamma_g$ with and without zero-beta rate, all asymptotic variances, $R^2_g$, cross-sectional $R^2$, Wald-test p-values, eigenvalues, $\hat p$ ($c=0.25, 0.5, 0.75$), for $p=1,2,3$ and $d=2$ | identical (variances: see deviations 1-2) |
+| SPCA | `SPCA_cv.m` from `WF_Simu.zip`, literal translation | $\hat\gamma_g$, Avar($\hat\gamma_g$), $\hat\alpha$, Avar($\hat\alpha$), mimicking weights, SDF weights, selected asset sets, for $p=1,2,3$ and $d=2$ | identical (selection size: see deviation 3) |
+| RP-PCA | `rpPCA_cv.m` from `WF_Simu.zip` (Giglio-Xiu-Zhang) | factor space, risk premia $\hat\eta\bar v$, SDF weights, for $\gamma\in\{-1,0,10\}$, $K\in\{1,3\}$ | identical |
+| RP-PCA | `rppca` 0.1.1 (PyPI, independent implementation) | eigenvalues, factor space, max. Sharpe ratio, RMS $\alpha$ | identical |
+| IPCA | original `ipca` 0.6.7 (bkelly-lab, PyPI) | restricted model: $\Gamma_\beta$, factors, fitted values, total $R^2$; with intercept: $\Gamma_\alpha$, $\Gamma_\beta$, factors, fitted values, $W_\alpha$; with an observed factor: $\Gamma_\delta$, span($\Gamma_\beta$), fitted values; out-of-sample factors vs. KPS §4.4 | identical |
+| Target PCA (XS, TS, XS-TS) | Bryzgalova et al. (2026): eqs. (5)-(13), (16), Propositions 1-3 (no public code) | operators (6), (9), (12) against brute-force constructions with explicit $T\times T$ matrices and `scipy.linalg.sqrtm`; Prop. 1 $T\times T$ form; Prop. 3 weights $\hat\omega=(\frac{1}{\tilde\gamma+1}I+\frac{\tilde\gamma}{\tilde\gamma+1}P_\Lambda)Q_K$; optimality for objective (11); alpha target (10) gives $R'G/T=\alpha^{ref}$; XS-metric (not squared) and TS-metric (16) | identical |
+
+Further checks in the test suite (`tests/`): Newey-West $\Pi$ matrices equal
+the authors' loop, rotation invariance of the three-pass estimator,
+Monte-Carlo coverage of 95% confidence intervals, recovery of the number of
+factors, IPCA ALS steps against per-period loops, and equivalences between
+nested models (RP-PCA with $\gamma=-1$ = covariance PCA, TS-target PCA with
+$G=1_T$ = RP-PCA).
 
 ## Documented deviations and extensions
 
-These are deliberate choices; none changes a paper's estimator.
+Where the original code and the paper differ, the package follows the paper.
+None of these changes an estimator.
 
-* **Zero-beta variance** (Giglio-Xiu): $\hat\sigma^2_\alpha$ uses the divisor
-  $N$ as in the paper; the authors' MATLAB code uses $N-1$.
-* **Out-of-sample pricing loadings**: Bryzgalova et al. (eq. 13) price with the
-  window's OLS betas, Lettau and Pelger with the eigenvector (projection)
-  loadings. Both are available (`oos_loadings="ols"` / `"projection"`).
-* **`comove` time-series target**: a package extension, not in the paper.
-* **SPCA tuning**: the paper (Appendix E) takes the median of the CV-optimal
-  $N_0$ over 100 repetitions of random 3-fold CV; `GridSearchCV` with
-  `KFold(3, shuffle=True, n_repeats=...)` maximises the mean score over all
-  repetitions instead. The SPCA estimator and its inference are exact.
-* **IPCA normalisation order**: the projection
-  $\Gamma_\beta'[\Gamma_\delta,\Gamma_\alpha]=0$ is applied before the
-  rotation, so all identification constraints hold exactly; the public
-  reference code rotates first. Results coincide without observed factors.
+1. **Zero-beta variance** (Giglio-Xiu): $\hat\sigma^2_\alpha$ uses the divisor
+   $N$ as in the paper; `PCAFM.m` uses $N-1$ (`var`). The results differ
+   exactly by the factor $(N-1)/N$.
+2. **Variance without zero-beta rate** (Giglio-Xiu): Theorem 1 evaluates $\Phi$
+   at the step-2 estimate $\hat\gamma=(\hat\beta'\hat\beta)^{-1}\hat\beta'\bar r$
+   (no intercept), and the package does exactly that. `PCAFM.m` reports that
+   estimate but plugs the latent premia from the regression *with* intercept
+   into `avarhat_nozero`. Both are asymptotically equivalent when the true
+   zero-beta rate is zero. In a Monte Carlo with a correctly specified number
+   of factors (300 samples), the standard errors agree to within 0.1% and the
+   coverage is identical. Differences only appear when too few latent factors
+   are used.
+3. **SPCA selection size**: the paper selects the $N_0=\lfloor qN\rfloor$ most
+   correlated assets. `SPCA_cv.m` uses `L >= bb(n-N0)` on 1-based sorted
+   scores, which keeps $N_0+1$ assets. The package selects exactly $N_0$, so
+   `SPCA(n_select=N0 + 1)` reproduces the authors' code exactly. The
+   authors' code also defaults to a Newey-West lag $q=1$; set `lags=1` to
+   reproduce it.
+4. **Out-of-sample pricing loadings**: Bryzgalova et al. (eq. 13) price with the
+   window's OLS betas, Lettau and Pelger with the eigenvector (projection)
+   loadings. Both are available (`oos_loadings="ols"` / `"projection"`).
+5. **IPCA $R^2$**: the package reports the uncentred $R^2$ of Kelly, Pruitt and
+   Su (2019); the original package's `score()` returns scikit-learn's centred
+   $R^2$. The fitted values are identical.
+6. **IPCA normalisation order**: the package projects
+   ($\Gamma_\beta'[\Gamma_\delta,\Gamma_\alpha]=0$) before rotating, so all
+   identification constraints hold exactly. The original package rotates
+   first. On the tested panels the estimates are identical; in general they
+   can differ only by the identifying rotation, never in fitted values.
+7. **SPCA tuning**: the paper (Appendix E) takes the median of the CV-optimal
+   $N_0$ over 100 repetitions of random 3-fold CV. `GridSearchCV` with
+   `KFold(3, shuffle=True, n_repeats=...)` maximises the mean score over all
+   repetitions instead.
+8. **SPCA Wald test**: `SPCA_cv.m` has no weak-factor test. The package adds the
+   Giglio-Xiu (2021, Theorem 4) Wald test, which applies unchanged to the
+   SPCA latent factors.
+9. **`comove` time-series target**: a package extension, not in the paper.
+10. **PCA centring**: Bryzgalova et al. formulate all estimators with uncentred
+    returns (their footnote 4), so their PCA benchmark is `PCA(centered=False)`.
+    Lettau and Pelger's PCA (and eq. 2) is covariance PCA, `PCA()` (default).
 
 ## Errors found in the previous research scripts
 
