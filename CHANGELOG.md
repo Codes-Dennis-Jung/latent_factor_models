@@ -21,7 +21,7 @@ All notable changes to this project are documented here. The format follows
   experiment `Engine` (in-sample and rolling out-of-sample) and the
   `Executor` (serial / thread / process backends, reproducible seeding).
 - Synthetic data generators, the `lfm` command-line interface, documentation
-  and runnable examples for every model.
+  and ten executed Jupyter notebooks (`examples/`) covering every model.
 - GitHub Actions CI: lint, type check, tests on Python 3.10-3.14 x
   Linux/Windows/macOS, minimum NumPy/SciPy, wheel smoke test.
 

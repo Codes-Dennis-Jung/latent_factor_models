@@ -1,6 +1,6 @@
 # XS-target PCA — factors with a cross-sectional economic target
 
-`latent_factor_models.XSTargetPCA` · registry names `xs_target_pca`, `xs-target` · example `examples/05_xs_target_pca.py`
+`latent_factor_models.XSTargetPCA` · registry names `xs_target_pca`, `xs-target` · notebook [`examples/05_xs_target_pca.ipynb`](../../examples/05_xs_target_pca.ipynb)
 
 ## Technical description
 

@@ -1,6 +1,6 @@
 # XS-TS-target PCA — cross-sectional and time-series targets combined
 
-`latent_factor_models.XSTSTargetPCA` · registry names `xsts_target_pca`, `xs-ts-pca` · example `examples/07_xsts_target_pca.py`
+`latent_factor_models.XSTSTargetPCA` · registry names `xsts_target_pca`, `xs-ts-pca` · notebook [`examples/07_xsts_target_pca.ipynb`](../../examples/07_xsts_target_pca.ipynb)
 
 ## Technical description
 

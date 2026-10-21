@@ -1,6 +1,6 @@
 # PCA — principal component analysis
 
-`latent_factor_models.PCA` · registry name `pca` · example `examples/01_pca.py`
+`latent_factor_models.PCA` · registry name `pca` · notebook [`examples/01_pca.ipynb`](../../examples/01_pca.ipynb)
 
 ## Technical description
 

@@ -1,6 +1,6 @@
 # IPCA — instrumented principal components analysis
 
-`latent_factor_models.IPCA` · registry names `ipca`, `instrumented-pca` · example `examples/04_ipca.py`
+`latent_factor_models.IPCA` · registry names `ipca`, `instrumented-pca` · notebook [`examples/04_ipca.ipynb`](../../examples/04_ipca.ipynb)
 
 ## Technical description
 

@@ -20,8 +20,13 @@ def register(*aliases: str) -> Callable[[C], C]:
     def decorator(cls: C) -> C:
         for key in (cls.name, *aliases):
             key = key.lower()
-            if key in _REGISTRY and _REGISTRY[key] is not cls:
-                raise ValueError(f"model name {key!r} already registered")
+            old = _REGISTRY.get(key)
+            redefined = old is not None and (old.__module__, old.__qualname__) == (
+                cls.__module__,
+                cls.__qualname__,
+            )  # e.g. a notebook cell executed twice
+            if old is not None and old is not cls and not redefined:
+                raise ValueError(f"model name {key!r} already registered by {old.__qualname__}")
             _REGISTRY[key] = cls
         return cls
 

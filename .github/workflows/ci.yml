@@ -41,6 +41,19 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: python -m pytest --cov --cov-report=term
 
+  notebooks:
+    name: Execute example notebooks
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev,notebooks]"
+      - run: python -m pytest -m slow -v   # notebooks, process backend, bootstrap power
+
   minimum-dependencies:
     name: Tests with minimum NumPy/SciPy
     runs-on: ubuntu-latest

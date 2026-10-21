@@ -92,8 +92,31 @@ research scripts.
 
 Start at [docs/index.md](docs/index.md): one document per model (technical
 description, methodology, implementation, example), plus inference,
-evaluation/engine and CLI. Runnable examples: `examples/01_pca.py` …
-`examples/08_engine_parallel.py`.
+evaluation/engine and CLI.
+
+## Example notebooks
+
+Ten executed Jupyter notebooks in [`examples/`](examples/) explain each model
+with its specification, parameters, options, outputs, plots and pitfalls, on
+synthetic data with known ground truth:
+
+| Notebook | Content |
+|---|---|
+| [`00_getting_started`](examples/00_getting_started.ipynb) | installation, data formats, common API, all outputs, parallelism, CLI |
+| [`01_pca`](examples/01_pca.ipynb) | PCA, number of factors, factor recovery, variants |
+| [`02_rppca`](examples/02_rppca.ipynb) | RP-PCA: effect of γ, weak-factor detection, CV, rolling OOS |
+| [`03_spca`](examples/03_spca.ipynb) | SPCA: screening CV, risk premia, alphas, Wald tests, hedging |
+| [`04_ipca`](examples/04_ipca.ipynb) | IPCA: panels, Γ, bootstrap tests, observed factors, OOS R² |
+| [`05_xs_target_pca`](examples/05_xs_target_pca.ipynb) | XS-target PCA: shape and macro targets, XS-metric |
+| [`06_ts_target_pca`](examples/06_ts_target_pca.ipynb) | TS-target PCA: alpha/mean/custom targets, TS-metric |
+| [`07_xsts_target_pca`](examples/07_xsts_target_pca.ipynb) | XS-TS-target PCA: 2-D parallel cross-validation |
+| [`08_engine_parallel`](examples/08_engine_parallel.ipynb) | engine, backends, config files, CLI, custom models |
+| [`09_risk_premia_inference`](examples/09_risk_premia_inference.ipynb) | Giglio-Xiu three-pass inference, coverage check |
+
+```bash
+pip install -e ".[notebooks]"
+jupyter lab examples/
+```
 
 ## Development
 

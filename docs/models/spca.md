@@ -1,6 +1,6 @@
 # SPCA — supervised PCA for risk premia of weak factors
 
-`latent_factor_models.SPCA` · registry names `spca`, `supervised-pca` · example `examples/03_spca.py`
+`latent_factor_models.SPCA` · registry names `spca`, `supervised-pca` · notebook [`examples/03_spca.ipynb`](../../examples/03_spca.ipynb)
 
 ## Technical description
 

@@ -1,6 +1,6 @@
 # RP-PCA — risk-premium PCA
 
-`latent_factor_models.RPPCA` · registry names `rppca`, `rp-pca` · example `examples/02_rppca.py`
+`latent_factor_models.RPPCA` · registry names `rppca`, `rp-pca` · notebook [`examples/02_rppca.ipynb`](../../examples/02_rppca.ipynb)
 
 ## Technical description
 

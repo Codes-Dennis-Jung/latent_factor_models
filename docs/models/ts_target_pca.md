@@ -1,6 +1,6 @@
 # TS-target PCA — factors with a time-series economic target
 
-`latent_factor_models.TSTargetPCA` · registry names `ts_target_pca`, `ts-target` · example `examples/06_ts_target_pca.py`
+`latent_factor_models.TSTargetPCA` · registry names `ts_target_pca`, `ts-target` · notebook [`examples/06_ts_target_pca.ipynb`](../../examples/06_ts_target_pca.ipynb)
 
 ## Technical description
 
