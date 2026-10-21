@@ -1,21 +1,13 @@
-# Archived legacy code
+# Validation
 
-This folder keeps the original research scripts that the package in `src/`
-replaces. They are **not** part of the package, are not imported anywhere and
-are excluded from distributions. They remain here for reproducibility of past
-results and as an audit trail.
+This document records how the implementation was checked against the
+literature and against the authors' code, the deliberate deviations, and the
+errors found in the previous research scripts that this package replaces.
 
-| Folder | Original content | Replaced by |
-|---|---|---|
-| `legacy/TPCA/factor_models.py` | PCA, XS/TS/XS-TS target PCA, CV | `models/spectral.py`, `models/pca.py`, `models/target_pca.py`, `models/targets.py`, `selection/cv.py` |
-| `legacy/RPPCA/mod_rppca.py` | RP-PCA + Giglio-Xiu three-pass inference | `models/rppca.py`, `inference/three_pass.py`, `selection/n_factors.py` |
-| `legacy/SPCA/mod_spca.py` | Supervised PCA + k-fold CV | `models/spca.py`, `inference/three_pass.py`, `selection/cv.py` |
-| `legacy/IPCA/ipca.py` | IPCA (fork of `bkelly-lab/ipca`, MIT) | `models/ipca.py`, `core/data.py` |
-| `legacy/IPCA/ipca_commodity` | Crypto/FX application script and data | not ported (application code) |
+The papers themselves are not distributed with the package (copyright); see
+`NOTICE` for full references.
 
-The large CSV files under `legacy/IPCA/ipca_commodity/Data` are git-ignored.
-
-## How the new code was validated
+## Numerical validation against reference implementations
 
 The new estimators were checked numerically against the authors' own code
 where it exists:
@@ -37,9 +29,33 @@ where it exists:
   the equivalent `T x T` formulation of Proposition 1 and the weighted
   low-rank objective (11). See `tests/test_math_spectral.py`.
 
-## Errors found in the legacy code
+## Documented deviations and extensions
 
-### `TPCA/factor_models.py`
+These are deliberate choices; none changes a paper's estimator.
+
+* **Zero-beta variance** (Giglio-Xiu): $\hat\sigma^2_\alpha$ uses the divisor
+  $N$ as in the paper; the authors' MATLAB code uses $N-1$.
+* **Out-of-sample pricing loadings**: Bryzgalova et al. (eq. 13) price with the
+  window's OLS betas, Lettau and Pelger with the eigenvector (projection)
+  loadings. Both are available (`oos_loadings="ols"` / `"projection"`).
+* **`comove` time-series target**: a package extension, not in the paper.
+* **SPCA tuning**: the paper (Appendix E) takes the median of the CV-optimal
+  $N_0$ over 100 repetitions of random 3-fold CV; `GridSearchCV` with
+  `KFold(3, shuffle=True, n_repeats=...)` maximises the mean score over all
+  repetitions instead. The SPCA estimator and its inference are exact.
+* **IPCA normalisation order**: the projection
+  $\Gamma_\beta'[\Gamma_\delta,\Gamma_\alpha]=0$ is applied before the
+  rotation, so all identification constraints hold exactly; the public
+  reference code rotates first. Results coincide without observed factors.
+
+## Errors found in the previous research scripts
+
+The original scripts (`TPCA/factor_models.py`, `RPPCA/mod_rppca.py`,
+`SPCA/mod_spca.py`, `IPCA/ipca.py`, a fork of `bkelly-lab/ipca`) were
+removed from the working tree; they remain available in the git history
+(commit `d105d56`, folder `archive/legacy`).
+
+### Target PCA script (`TPCA/factor_models.py`)
 1. `predict()` (all target classes) renormalised out-of-sample factors to unit
    norm on the test sample, so their scale depended on the test length and did
    not match the training loadings.
@@ -61,7 +77,7 @@ where it exists:
    `I + gamma~ P_Lambda`).
 9. `r_squared` divided a mean squared residual by the pooled panel variance.
 
-### `RPPCA/mod_rppca.py`
+### RP-PCA / three-pass script (`RPPCA/mod_rppca.py`)
 1. `np.linalg.eig` on a symmetric matrix and only eigenvectors re-ordered:
    eigenvalues stayed unsorted.
 2. Number-of-factors estimator: unsorted eigenvalues, a `(20,) + (20,1)`
@@ -78,7 +94,7 @@ where it exists:
 7. Sign flips applied in place to a view of the returned factors; NumPy 2.x
    crashes on `float()` of size-1 arrays; NaNs zero-filled silently.
 
-### `SPCA/mod_spca.py`
+### SPCA script (`SPCA/mod_spca.py`)
 1. Crashed for more than one observable factor (`COR[II]` flatten) and on
    NumPy 2.x (`s` shape `(1,)`).
 2. Hedging R² pooled over factors instead of per factor.
@@ -91,7 +107,7 @@ where it exists:
    last element, failures scored as best results, global RNG reseeding, an
    ad-hoc "combined score" that is order dependent and not in the paper.
 
-### `IPCA/ipca.py`
+### IPCA fork (`IPCA/ipca.py`)
 1. Intercept together with pre-specified factors crashed (ones row appended twice).
 2. Refit kept a stale `PSF`; bootstraps then used the wrong design.
 3. `predictOOS` estimated the intercept/observed factors as free factors.

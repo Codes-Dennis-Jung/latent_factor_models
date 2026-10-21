@@ -13,7 +13,7 @@
 | Risk-premium inference (three-pass, Newey-West, Wald) | [inference.md](inference.md) |
 | Metrics, number of factors, cross-validation, engine | [evaluation.md](evaluation.md) |
 | Command line | [cli.md](cli.md) |
-| Legacy code, validation and errors fixed | [../archive/README.md](../archive/README.md) |
+| Validation, deviations, errors fixed in the original scripts | [validation.md](validation.md) |
 
 Every model document has the same structure: **technical description**
 (what the model is for), **methodology** (the estimator as in the paper),

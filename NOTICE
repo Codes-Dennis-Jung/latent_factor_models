@@ -21,10 +21,7 @@ academic literature. Credit for the methods belongs to their authors:
   * Onatski, A. (2010). Determining the number of factors from empirical
     distribution of eigenvalues. Review of Economics and Statistics 92(4).
 
-The archived legacy IPCA code in archive/legacy/IPCA is a modified fork of
-https://github.com/bkelly-lab/ipca (MIT License, Copyright (c) the IPCA
-authors). The new implementation in src/ does not reuse that code.
-
-The papers in Literature/ are copyrighted by their publishers/authors and
-are NOT covered by the MIT license of this package; they are excluded from
-all distributions built from this repository.
+The IPCA implementation was validated against the reference implementation
+https://github.com/bkelly-lab/ipca (MIT License); it does not reuse its code.
+The papers listed above are copyrighted by their publishers/authors and are
+not distributed with this package.
