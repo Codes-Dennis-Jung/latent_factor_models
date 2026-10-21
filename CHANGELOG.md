@@ -31,4 +31,4 @@ All notable changes to this project are documented here. The format follows
 - Dual licensed under MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`).
 - Replaces the original research scripts (TPCA, RPPCA, SPCA, IPCA folders),
   which were removed; `docs/validation.md` lists the errors found and fixed
-  (the scripts remain in the git history).
+  (the scripts themselves are not published).

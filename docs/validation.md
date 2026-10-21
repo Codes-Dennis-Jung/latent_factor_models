@@ -79,8 +79,8 @@ None of these changes an estimator.
 
 The original scripts (`TPCA/factor_models.py`, `RPPCA/mod_rppca.py`,
 `SPCA/mod_spca.py`, `IPCA/ipca.py`, a fork of `bkelly-lab/ipca`) were
-removed from the working tree; they remain available in the git history
-(commit `fc9a6bc`, folder `archive/legacy`).
+replaced by this package and are not published. The list below documents the
+errors that were found in them and fixed.
 
 ### Target PCA script (`TPCA/factor_models.py`)
 1. `predict()` (all target classes) renormalised out-of-sample factors to unit
