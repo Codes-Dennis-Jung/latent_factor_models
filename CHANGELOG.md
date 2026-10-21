@@ -26,5 +26,6 @@ All notable changes to this project are documented here. The format follows
   Linux/Windows/macOS, minimum NumPy/SciPy, wheel smoke test.
 
 ### Changed
-- Legacy research scripts moved to `archive/legacy`; see
-  `archive/README.md` for the errors found and fixed.
+- Replaces the original research scripts (TPCA, RPPCA, SPCA, IPCA folders),
+  which were removed; `docs/validation.md` lists the errors found and fixed
+  (the scripts remain in the git history).

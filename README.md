@@ -82,9 +82,9 @@ parallel `Executor`. See [docs/architecture.md](docs/architecture.md).
 * 69 tests, including Monte-Carlo coverage of confidence intervals, `ruff`
   (incl. numpy docstrings) and `mypy` clean.
 
-The original research scripts are archived in `archive/legacy`;
-[archive/README.md](archive/README.md) lists the errors found in them and how
-they were fixed.
+[docs/validation.md](docs/validation.md) records every check, the documented
+deviations, and the errors found in (and fixed relative to) the original
+research scripts.
 
 ## Documentation
 
@@ -105,6 +105,5 @@ python -m build           # sdist + wheel
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Method credits and third-party notices are in
-[NOTICE](NOTICE). The PDFs in `Literature/` are copyrighted by their
-publishers and are not part of the package or its distributions.
+MIT, see [LICENSE](LICENSE). Method credits and full references of the
+underlying papers are in [NOTICE](NOTICE).
