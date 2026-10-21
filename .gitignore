@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated example / CLI output
+synthetic_data/
+results*.csv
+fit_output/
+
+# Large legacy data files (kept locally, not versioned)
+archive/legacy/IPCA/ipca_commodity/Data/*.csv
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Copyrighted papers (not redistributable under the MIT license)
+Literature/
