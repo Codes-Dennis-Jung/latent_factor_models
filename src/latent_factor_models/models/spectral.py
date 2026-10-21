@@ -41,7 +41,7 @@ import numpy as np
 
 from ..core.base import PortfolioFactorModel
 from ..core.data import FactorData
-from ..core.linalg import FloatArray, ols, orthonormal_basis, sign_by_mean, symmetrize, top_eigh
+from ..core.linalg import FloatArray, ols, orthonormal_basis, sign_by_mean, top_gram_eigh
 from ..evaluation import metrics
 
 
@@ -64,7 +64,8 @@ class SpectralFactorModel(PortfolioFactorModel):
         Unit-norm eigenvectors ``Q_K`` of the operator ``M`` (sign-aligned with
         the factors).
     operator_ : ndarray of shape (N, N)
-        The operator ``M``.  ``eigenvalues_ / operator_trace_`` are
+        The operator ``M`` (computed on access; only the thin ``T x N``
+        weighted panel is stored).  ``eigenvalues_ / operator_trace_`` are
         absorption ratios comparable across models.
     operator_trace_ : float
         ``trace(M)``.
@@ -77,8 +78,8 @@ class SpectralFactorModel(PortfolioFactorModel):
     """
 
     eigenvectors_: FloatArray
-    operator_: FloatArray
     operator_trace_: float
+    _weighted: FloatArray
     gamma_tilde_: float
     spec_: SpectralSpec
     scale_: FloatArray
@@ -103,13 +104,16 @@ class SpectralFactorModel(PortfolioFactorModel):
         scale = R.std(axis=0) if self.standardize else np.ones(N)
         if np.any(scale <= 0):
             raise ValueError("cannot standardize assets with zero variance")
-        R_work = R / scale
-
-        S = R_work.T @ R_work
+        # Thin weighted panel X = W_TS^{1/2} R C, so that M = X'X / (NT).  Both
+        # square roots are closed form because P_G and P_Lambda are projectors:
+        # (I + g P)^2 = I + (2g + g^2) P, i.e. g = sqrt(1 + gamma) - 1.
+        X = R / scale if self.standardize else R
         if spec.ts_target is not None and spec.gamma_ts != 0.0:
+            if spec.gamma_ts < -1.0:
+                raise ValueError("gamma_ts must be >= -1 (W_TS positive semi-definite)")
             QG = orthonormal_basis(spec.ts_target)
-            B = QG.T @ R_work
-            S = S + spec.gamma_ts * (B.T @ B)
+            g_ts = float(np.sqrt(1.0 + spec.gamma_ts) - 1.0)
+            X = X + g_ts * (QG @ (QG.T @ X))
 
         gamma_tilde = 0.0
         QL: FloatArray | None = None
@@ -119,15 +123,13 @@ class SpectralFactorModel(PortfolioFactorModel):
             if spec.gamma_xs * N / L + 1.0 < 0.0:
                 raise ValueError("gamma_xs too negative: W_XS must be positive semi-definite")
             gamma_tilde = float(np.sqrt(spec.gamma_xs * N / L + 1.0) - 1.0)
+            X = X + gamma_tilde * ((X @ QL) @ QL.T)
 
-        def apply_c(X: FloatArray) -> FloatArray:
-            if QL is None:
-                return X
-            return X + gamma_tilde * (QL @ (QL.T @ X))
-
-        M = symmetrize(apply_c(apply_c(S).T).T) / (N * T)
-        eigenvalues, Q = top_eigh(M, K)
-        omega = apply_c(Q) / (1.0 + gamma_tilde) / scale[:, None]
+        # Top-K eigenpairs of X'X through the smaller of the N x N / T x T Gram matrices.
+        gram_vals, Q = top_gram_eigh(X, K)
+        eigenvalues = gram_vals / (N * T)
+        omega = (Q if QL is None else Q + gamma_tilde * (QL @ (QL.T @ Q))) / (1.0 + gamma_tilde)
+        omega = omega / scale[:, None]
         F = R @ omega
         signs = sign_by_mean(F)
         omega, Q, F = omega * signs, Q * signs, F * signs
@@ -141,16 +143,25 @@ class SpectralFactorModel(PortfolioFactorModel):
         self.intercepts_ = intercepts
         self.eigenvalues_ = eigenvalues
         self.eigenvectors_ = Q
-        self.operator_ = M
-        self.operator_trace_ = float(np.trace(M))
+        self._weighted = X
+        self.operator_trace_ = float(np.einsum("ij,ij->", X, X)) / (N * T)
         self.gamma_tilde_ = gamma_tilde
         self.scale_ = scale
 
     # ------------------------------------------------------------------
-    def spectrum(self) -> FloatArray:
-        """All eigenvalues of the operator in descending order."""
+    @property
+    def operator_(self) -> FloatArray:
+        """The ``N x N`` operator ``M = X'X/(NT)``, built on demand (not stored)."""
         self._check_fitted()
-        return np.linalg.eigvalsh(self.operator_)[::-1].copy()
+        X = self._weighted
+        return np.asarray(X.T @ X) / X.size
+
+    def spectrum(self) -> FloatArray:
+        """All ``N`` eigenvalues of the operator in descending order (zeros beyond rank)."""
+        self._check_fitted()
+        X = self._weighted
+        s2 = np.linalg.svd(X, compute_uv=False) ** 2 / X.size
+        return np.concatenate([s2, np.zeros(X.shape[1] - s2.size)])
 
     def absorption_ratio(self) -> FloatArray:
         """Share ``lambda_k / trace(M)`` of the operator captured by each factor."""

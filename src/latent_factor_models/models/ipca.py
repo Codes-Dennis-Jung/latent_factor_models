@@ -36,11 +36,12 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 import numpy as np
+import scipy.linalg as sla
 
 from ..core.base import LatentFactorModel
 from ..core.data import CharacteristicPanel
 from ..core.exceptions import ConvergenceWarning, DataError
-from ..core.linalg import FloatArray, as_float_array, sign_by_mean
+from ..core.linalg import FloatArray, as_float_array, batched_matvec, sign_by_mean
 from ..core.registry import register
 from ..engine.parallel import Backend, Executor, as_executor, spawn_seeds
 
@@ -65,9 +66,11 @@ def _factor_step(
     gamma: FloatArray, X: FloatArray, W: FloatArray, G: FloatArray, K: int
 ) -> FloatArray:
     gb, gd = gamma[:, :K], gamma[:, K:]
-    A = np.einsum("lk,tlm,mj->tkj", gb, W, gb)
-    resid = X if gd.shape[1] == 0 else X - np.einsum("tlm,mj,tj->tl", W, gd, G)
-    rhs = resid @ gb
+    Wgb = W @ gb  # (T, L, K), batched GEMM
+    A = np.matmul(gb.T, Wgb)  # (T, K, K) = gb' W_t gb
+    rhs = X @ gb
+    if gd.shape[1]:
+        rhs = rhs - np.einsum("tlk,tl->tk", Wgb, G @ gd.T)  # gb' W_t gd g_t (W_t symmetric)
     return np.asarray(np.linalg.solve(A, rhs[..., None])[..., 0])
 
 
@@ -76,9 +79,16 @@ def _gamma_step(
 ) -> FloatArray:
     Ft = np.column_stack([F, G])
     L, Kt = X.shape[1], Ft.shape[1]
-    denom = np.einsum("t,tlm,tk,tj->lkmj", weights, W, Ft, Ft).reshape(L * Kt, L * Kt)
-    numer = np.einsum("t,tl,tk->lk", weights, X, Ft).reshape(L * Kt)
-    sol = np.linalg.solve(denom, numer)
+    wF = weights[:, None] * Ft
+    # sum_t w_t W_t (x) f_t f_t' as one GEMM: (L*L, T) @ (T, Kt*Kt)
+    outer = (wF[:, :, None] * Ft[:, None, :]).reshape(len(Ft), Kt * Kt)
+    denom = (W.reshape(len(W), L * L).T @ outer).reshape(L, L, Kt, Kt)
+    denom = denom.transpose(0, 2, 1, 3).reshape(L * Kt, L * Kt)
+    numer = (X.T @ wF).reshape(L * Kt)
+    try:  # the normal-equation matrix is symmetric positive definite
+        sol = sla.cho_solve(sla.cho_factor(denom, check_finite=False), numer, check_finite=False)
+    except np.linalg.LinAlgError:
+        sol = np.linalg.solve(denom, numer)
     return np.asarray(sol.reshape(L, Kt))
 
 
@@ -403,7 +413,7 @@ class IPCA(LatentFactorModel):
         G = self._design(panel)
         coef = self.gamma_[:, : self.n_factors] @ F.T + self.gamma_[:, self.n_factors :] @ G.T
         _, z = panel.clean()
-        out = np.einsum("tnl,lt->tn", z, coef)
+        out = batched_matvec(z, coef.T)
         return np.where(panel.mask, out, np.nan)
 
     def predict(
@@ -428,7 +438,7 @@ class IPCA(LatentFactorModel):
         self._check_fitted()
         p = self.panel_ if panel is None else self._coerce(panel, **kwargs)
         _, z = p.clean()
-        return np.asarray(np.einsum("tnl,lk->tnk", z, self.gamma_beta_))
+        return np.asarray(z @ self.gamma_beta_)
 
     def evaluate(self, panel: Any = None, **kwargs: Any) -> dict[str, float]:
         """Total and predictive R² at the asset and managed-portfolio level (uncentred).
@@ -450,7 +460,7 @@ class IPCA(LatentFactorModel):
             fit = np.nan_to_num(self._systematic(p, F))
             out[f"{label}_r2"] = float(1 - np.sum((r - fit) ** 2) / np.sum(r**2))
             coef = self.gamma_[:, : self.n_factors] @ F.T + self.gamma_[:, self.n_factors :] @ G.T
-            fit_x = np.einsum("tlm,mt->tl", W, coef)
+            fit_x = batched_matvec(W, coef.T)
             out[f"{label}_r2_x"] = float(1 - np.sum((X - fit_x) ** 2) / np.sum(X**2))
         return out
 
@@ -460,7 +470,7 @@ class IPCA(LatentFactorModel):
             self.gamma_[:, : self.n_factors] @ self.factors_.T
             + self.gamma_[:, self.n_factors :] @ self._G.T
         )
-        return np.asarray(self._X - np.einsum("tlm,mt->tl", self._W, coef))
+        return np.asarray(self._X - batched_matvec(self._W, coef.T))
 
     def _run_bootstrap(
         self,
@@ -481,7 +491,7 @@ class IPCA(LatentFactorModel):
             + gamma_h0[:, self.n_factors :] @ self._G.T
         )
         prob = _BootstrapProblem(
-            X_h0=np.einsum("tlm,mt->tl", self._W, coef),
+            X_h0=batched_matvec(self._W, coef.T),
             resid=self._residual_portfolios(),
             W=self._W,
             n_obs=self._n,

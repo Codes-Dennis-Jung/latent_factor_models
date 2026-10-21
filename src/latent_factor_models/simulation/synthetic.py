@@ -23,7 +23,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ..core.data import CharacteristicPanel, FactorData
-from ..core.linalg import FloatArray
+from ..core.linalg import FloatArray, batched_matvec
 
 
 @dataclass
@@ -157,7 +157,7 @@ def simulate_ipca_panel(
     gamma_beta[:irrelevant] = 0.0
     gamma_alpha = alpha_scale * rng.standard_normal(L)
     F = factor_mean + rng.standard_normal((T, K))
-    signal = np.einsum("tnl,l->tn", Z, gamma_alpha) + np.einsum("tnl,lk,tk->tn", Z, gamma_beta, F)
+    signal = Z @ gamma_alpha + batched_matvec(Z @ gamma_beta, F)
     R = signal + idio_vol * rng.standard_normal((T, N))
     if missing > 0:
         R[rng.random((T, N)) < missing] = np.nan

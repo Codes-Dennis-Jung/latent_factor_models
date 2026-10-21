@@ -24,7 +24,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from .exceptions import DataError
-from .linalg import FloatArray, as_float_array
+from .linalg import FloatArray, as_float_array, batched_matvec
 
 
 def _labels(obj: Any, axis: int) -> list[Any] | None:
@@ -268,8 +268,9 @@ class CharacteristicPanel:
         """
         r, z = self.clean()
         n = self.n_obs
-        X = np.einsum("tnl,tn->tl", z, r) / n[:, None]
-        W = np.einsum("tnl,tnm->tlm", z, z) / n[:, None, None]
+        zt = z.transpose(0, 2, 1)
+        X = batched_matvec(zt, r) / n[:, None]
+        W = np.matmul(zt, z) / n[:, None, None]
         return X, W, n
 
     def take(self, rows: ArrayLike) -> CharacteristicPanel:

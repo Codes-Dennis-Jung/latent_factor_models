@@ -222,3 +222,59 @@ def test_generalized_correlation_and_variance_signal(sim):
     m = lfm.RPPCA(3, gamma=10.0).fit(sim.returns)
     vs = m.variance_signal()
     assert vs.shape == (3,) and np.all(np.diff(vs) <= 0) and vs[-1] > 0
+
+
+@pytest.mark.parametrize(
+    "model_factory",
+    [
+        lambda: lfm.PCA(3),
+        lambda: lfm.RPPCA(3, gamma=10.0),
+        lambda: lfm.XSTargetPCA(3, gamma_xs=0.5),
+        lambda: lfm.TSTargetPCA(3, gamma_ts=15.0),
+        lambda: lfm.XSTSTargetPCA(3, gamma_xs=0.3, gamma_ts=5.0),
+    ],
+)
+def test_wide_panel_dual_route_matches_brute_force(model_factory):
+    """N > T uses the T x T Gram matrix; results must equal the explicit N x N operator."""
+    sim = lfm.simulate_factor_returns(T=80, N=200, seed=5)
+    R, Lam, Fref = sim.returns, sim.xs_target, sim.reference
+    m = model_factory().fit(R, xs_target=Lam, factors=Fref)
+    spec = m.spec_
+    M, C = naive_operator(
+        R, G=spec.ts_target, gamma_ts=spec.gamma_ts, Lam=spec.xs_target, gamma_xs=spec.gamma_xs
+    )
+    vals, Q = top_vecs(M, 3)
+    np.testing.assert_allclose(m.eigenvalues_, vals, rtol=1e-9)
+    assert subspace_equal(m.weights_, C @ Q)
+    np.testing.assert_allclose(m.operator_, M, atol=1e-12)
+    np.testing.assert_allclose(
+        m.spectrum()[:10], np.sort(np.linalg.eigvalsh(M))[::-1][:10], rtol=1e-8, atol=1e-14
+    )
+    assert np.isclose(m.operator_trace_, np.trace(M))
+
+
+def test_linear_algebra_primitives():
+    from latent_factor_models.core.linalg import (
+        batched_matvec,
+        top_gram_eigh,
+        top_singular_triplet,
+    )
+
+    rng = np.random.default_rng(3)
+    for shape, method in [
+        (s, m)
+        for s in ((50, 20), (20, 50), (300, 120), (120, 300))
+        for m in ("dense", "lanczos", "auto")
+    ]:  # both sides, all solvers
+        X = rng.standard_normal(shape)
+        vals, V = top_gram_eigh(X, 4, method=method)
+        ref = np.sort(np.linalg.eigvalsh(X.T @ X))[::-1][:4]
+        np.testing.assert_allclose(vals, ref, rtol=1e-10)
+        np.testing.assert_allclose(V.T @ V, np.eye(4), atol=1e-10)
+        np.testing.assert_allclose(X.T @ X @ V, V * vals, atol=1e-8)
+        u, s, v = top_singular_triplet(X)
+        U_, S_, Vt_ = np.linalg.svd(X)
+        assert np.isclose(s, S_[0])
+        np.testing.assert_allclose(np.outer(u, v), np.outer(U_[:, 0], Vt_[0]), atol=1e-10)
+    A, x = rng.standard_normal((7, 4, 3)), rng.standard_normal((7, 3))
+    np.testing.assert_allclose(batched_matvec(A, x), np.einsum("tij,tj->ti", A, x))

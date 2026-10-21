@@ -33,7 +33,7 @@ import numpy as np
 from ..core.base import PortfolioFactorModel
 from ..core.data import FactorData
 from ..core.exceptions import DataError
-from ..core.linalg import FloatArray, ols, solve_psd
+from ..core.linalg import FloatArray, ols, solve_psd, top_singular_triplet
 from ..core.registry import register
 from ..inference.hac import LagRule, newey_west_lag, two_sided_pvalue
 from ..inference.three_pass import RiskPremiaResult, alpha_avar, risk_premia_inference
@@ -160,8 +160,8 @@ class SPCA(PortfolioFactorModel):
         for k in range(p):
             scores = screening_scores(Rk, Gk, self.screening)
             idx = np.sort(np.argsort(-scores, kind="stable")[:n0])
-            U, s, Vt = np.linalg.svd(Rk[:, idx], full_matrices=False)  # (T, |I|) = xi s varsigma'
-            xi, sigma, vs = U[:, 0], s[0], Vt[0]
+            # leading singular triplet of the (T, |I|) selection: Rk[:, I] v = sigma xi
+            xi, sigma, vs = top_singular_triplet(Rk[:, idx])
             if sigma <= 0:
                 raise DataError(f"SPCA step {k + 1}: selected returns are identically zero")
             g_k = sqT * (vs @ rk[idx]) / sigma
